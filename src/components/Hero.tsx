@@ -3,7 +3,7 @@ import heroCosmic from "@/assets/hero-cosmic-pizza.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background stars effect */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(250_60%_25%_/_0.3)_0%,_transparent_70%)]" />
       

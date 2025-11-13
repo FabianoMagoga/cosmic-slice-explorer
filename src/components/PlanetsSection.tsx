@@ -40,7 +40,7 @@ const PlanetsSection = () => {
   ];
 
   return (
-    <section className="py-20 px-4 relative">
+    <section id="planetas" className="py-20 px-4 relative">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
