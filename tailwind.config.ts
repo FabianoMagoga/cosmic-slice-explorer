@@ -57,6 +57,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        cosmic: {
+          earth: "hsl(210 70% 55%)",
+          mars: "hsl(15 85% 60%)",
+          saturn: "hsl(45 75% 65%)",
+          jupiter: "hsl(35 70% 58%)",
+          mercury: "hsl(0 70% 65%)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
