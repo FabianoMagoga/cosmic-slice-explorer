@@ -1,21 +1,40 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const menuItems = [
-    { label: "Início", href: "#hero" },
-    { label: "Planetas", href: "#planetas" },
-    { label: "Sobre", href: "#sobre" },
-    { label: "Contato", href: "#contato" },
+    { label: "Início", href: "/", isRoute: true },
+    { label: "Cardápio", href: "/menu", isRoute: true },
+    { label: "Planetas", href: "#planetas", isRoute: false },
+    { label: "Sobre", href: "#sobre", isRoute: false },
+    { label: "Contato", href: "#contato", isRoute: false },
   ];
 
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+  const handleNavigation = (item: typeof menuItems[0]) => {
+    if (item.isRoute) {
+      navigate(item.href);
+      setIsMenuOpen(false);
+    } else {
+      if (location.pathname !== "/") {
+        navigate("/");
+        setTimeout(() => {
+          const element = document.querySelector(item.href);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 100);
+      } else {
+        const element = document.querySelector(item.href);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }
       setIsMenuOpen(false);
     }
   };
@@ -36,7 +55,7 @@ const Header = () => {
             {menuItems.map((item) => (
               <button
                 key={item.label}
-                onClick={() => scrollToSection(item.href)}
+                onClick={() => handleNavigation(item)}
                 className="text-foreground/80 hover:text-primary transition-colors font-medium"
               >
                 {item.label}
@@ -66,7 +85,7 @@ const Header = () => {
             {menuItems.map((item) => (
               <button
                 key={item.label}
-                onClick={() => scrollToSection(item.href)}
+                onClick={() => handleNavigation(item)}
                 className="block w-full text-left px-4 py-3 text-foreground/80 hover:text-primary hover:bg-accent/10 rounded-lg transition-colors font-medium"
               >
                 {item.label}
