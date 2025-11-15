@@ -1,11 +1,12 @@
 import { Pizza, Cake, Coffee } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/contexts/CartContext";
 
 type Produto = {
   id: string;
   nome: string;
-  categoria: string;
+  categoria: "Pizza Salgadas" | "Pizza Doces" | "Bebida";
   preco: number;
 };
 
@@ -14,6 +15,8 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ produto }: ProductCardProps) => {
+  const { addItem } = useCart();
+
   const getIcon = () => {
     switch (produto.categoria) {
       case "Pizza Salgadas":
@@ -46,6 +49,7 @@ const ProductCard = ({ produto }: ProductCardProps) => {
         <Button 
           className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
           size="lg"
+          onClick={() => addItem(produto)}
         >
           Adicionar ao Pedido
         </Button>

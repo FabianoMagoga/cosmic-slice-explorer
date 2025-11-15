@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 type Produto = {
   id: string;
   nome: string;
-  categoria: string;
+  categoria: "Pizza Salgadas" | "Pizza Doces" | "Bebida";
   preco: number;
   ativo: boolean;
 };
