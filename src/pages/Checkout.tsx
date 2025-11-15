@@ -168,7 +168,10 @@ const Checkout = () => {
                   <CardContent>
                     <RadioGroup
                       value={formData.modo}
-                      onValueChange={(value) => setFormData({ ...formData, modo: value as "ENTREGA" | "RETIRADA" })}
+                      onValueChange={(value) => {
+                        console.log("Modo alterado para:", value);
+                        setFormData({ ...formData, modo: value as "ENTREGA" | "RETIRADA" });
+                      }}
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="ENTREGA" id="entrega" />
@@ -273,9 +276,10 @@ const Checkout = () => {
                   <CardContent>
                     <RadioGroup
                       value={formData.formaPagamento}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, formaPagamento: value as any })
-                      }
+                      onValueChange={(value) => {
+                        console.log("Forma de pagamento alterada para:", value);
+                        setFormData({ ...formData, formaPagamento: value as any });
+                      }}
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="Dinheiro" id="dinheiro" />

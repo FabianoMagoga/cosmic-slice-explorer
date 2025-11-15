@@ -25,16 +25,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const { toast } = useToast();
 
+  console.log("CartProvider renderizado com", items.length, "itens");
+
   const addItem = (produto: { id: string; nome: string; categoria: "Pizza Salgadas" | "Pizza Doces" | "Bebida"; preco: number }) => {
+    console.log("addItem chamado com:", produto);
     setItems((current) => {
       const existing = current.find((item) => item.id === produto.id);
       if (existing) {
+        console.log("Item já existe no carrinho, aumentando quantidade");
         return current.map((item) =>
           item.id === produto.id
             ? { ...item, quantidade: item.quantidade + 1 }
             : item
         );
       }
+      console.log("Adicionando novo item ao carrinho");
       return [...current, { ...produto, quantidade: 1 }];
     });
     
