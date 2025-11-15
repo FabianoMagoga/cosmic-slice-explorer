@@ -1,7 +1,9 @@
-import { Pizza, Cake, Coffee } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
+import pizzaSalgadaImg from "@/assets/pizza-salgada.jpg";
+import pizzaDoceImg from "@/assets/pizza-doce.jpg";
+import bebidaImg from "@/assets/bebida.jpg";
 
 type Produto = {
   id: string;
@@ -22,29 +24,35 @@ const ProductCard = ({ produto }: ProductCardProps) => {
     addItem(produto);
   };
 
-  const getIcon = () => {
+  const getImage = () => {
     switch (produto.categoria) {
       case "Pizza Salgadas":
-        return <Pizza className="h-12 w-12 text-primary" />;
+        return pizzaSalgadaImg;
       case "Pizza Doces":
-        return <Cake className="h-12 w-12 text-accent" />;
+        return pizzaDoceImg;
       case "Bebida":
-        return <Coffee className="h-12 w-12 text-secondary" />;
+        return bebidaImg;
       default:
-        return <Pizza className="h-12 w-12 text-primary" />;
+        return pizzaSalgadaImg;
     }
   };
 
   return (
-    <Card className="group hover:scale-105 transition-all duration-300 bg-card/50 backdrop-blur-sm border-border/40 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
-      <CardContent className="pt-6">
-        <div className="flex flex-col items-center text-center space-y-4">
-          <div className="p-4 rounded-full bg-muted/50 group-hover:bg-primary/10 transition-colors">
-            {getIcon()}
+    <Card className="group hover:scale-105 transition-all duration-300 bg-card/50 backdrop-blur-sm border-border/40 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 overflow-hidden">
+      <CardContent className="p-0">
+        <div className="flex flex-col">
+          <div className="relative w-full h-48 overflow-hidden">
+            <img 
+              src={getImage()} 
+              alt={produto.nome}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
           </div>
-          <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
-            {produto.nome}
-          </h3>
+          <div className="p-6 text-center">
+            <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
+              {produto.nome}
+            </h3>
+          </div>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-center space-y-3">

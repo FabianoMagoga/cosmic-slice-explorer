@@ -145,6 +145,7 @@ export type Database = {
           categoria: Database["public"]["Enums"]["categoria_produto"]
           created_at: string
           id: string
+          image_url: string | null
           nome: string
           preco: number
         }
@@ -153,6 +154,7 @@ export type Database = {
           categoria: Database["public"]["Enums"]["categoria_produto"]
           created_at?: string
           id?: string
+          image_url?: string | null
           nome: string
           preco: number
         }
@@ -161,6 +163,7 @@ export type Database = {
           categoria?: Database["public"]["Enums"]["categoria_produto"]
           created_at?: string
           id?: string
+          image_url?: string | null
           nome?: string
           preco?: number
         }
