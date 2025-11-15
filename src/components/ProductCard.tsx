@@ -17,6 +17,11 @@ interface ProductCardProps {
 const ProductCard = ({ produto }: ProductCardProps) => {
   const { addItem } = useCart();
 
+  const handleAddToCart = () => {
+    console.log("Botão clicado - tentando adicionar produto:", produto);
+    addItem(produto);
+  };
+
   const getIcon = () => {
     switch (produto.categoria) {
       case "Pizza Salgadas":
@@ -49,7 +54,7 @@ const ProductCard = ({ produto }: ProductCardProps) => {
         <Button 
           className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
           size="lg"
-          onClick={() => addItem(produto)}
+          onClick={handleAddToCart}
         >
           Adicionar ao Pedido
         </Button>
