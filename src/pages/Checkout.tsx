@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,17 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  // Garantir sessão anônima para clientes
+  useEffect(() => {
+    const ensureAnonymousSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        await supabase.auth.signInAnonymously();
+      }
+    };
+    ensureAnonymousSession();
+  }, []);
 
   const [formData, setFormData] = useState({
     nome: "",

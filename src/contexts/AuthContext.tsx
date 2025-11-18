@@ -35,30 +35,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (usuario: string, senha: string) => {
     try {
-      const { data, error } = await supabase
-        .from('funcionarios')
-        .select('*')
-        .eq('usuario', usuario)
-        .eq('senha', senha)
-        .eq('ativo', true)
-        .single();
+      // Usar Edge Function para login seguro com bcrypt
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('admin-auth', {
+        body: { action: 'login', usuario, senha }
+      });
 
-      if (error || !data) {
-        return { success: false, error: 'Usuário ou senha inválidos' };
+      if (error || !data?.success) {
+        return { success: false, error: data?.error || 'Usuário ou senha inválidos' };
       }
 
       const func: Funcionario = {
-        id: data.id,
-        usuario: data.usuario,
-        nome: data.nome,
-        papel: data.papel as 'ADMIN' | 'ATENDENTE',
-        ativo: data.ativo
+        id: data.funcionario.id,
+        usuario: data.funcionario.usuario,
+        nome: data.funcionario.nome,
+        papel: data.funcionario.papel as 'ADMIN' | 'ATENDENTE',
+        ativo: data.funcionario.ativo
       };
 
       setFuncionario(func);
       localStorage.setItem('funcionario', JSON.stringify(func));
       return { success: true };
     } catch (error) {
+      console.error('Erro no login:', error);
       return { success: false, error: 'Erro ao fazer login' };
     }
   };
