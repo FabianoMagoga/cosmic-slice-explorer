@@ -38,6 +38,36 @@ export type Database = {
         }
         Relationships: []
       }
+      funcionarios: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          nome: string
+          papel: string
+          senha: string
+          usuario: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          papel: string
+          senha: string
+          usuario: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          papel?: string
+          senha?: string
+          usuario?: string
+        }
+        Relationships: []
+      }
       itens_pedido: {
         Row: {
           categoria: Database["public"]["Enums"]["categoria_produto"]
