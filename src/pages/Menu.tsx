@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Produto = {
   id: string;
@@ -16,7 +18,10 @@ type Produto = {
 const Menu = () => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  
+  const categoriaUrl = searchParams.get("categoria");
 
   useEffect(() => {
     fetchProdutos();
@@ -72,27 +77,46 @@ const Menu = () => {
               <p className="mt-4 text-muted-foreground">Carregando produtos...</p>
             </div>
           ) : (
-            <div className="space-y-16">
-              {categorias.map((categoria) => {
-                const produtosCategoria = getProdutosPorCategoria(categoria);
-                if (produtosCategoria.length === 0) return null;
+            <Tabs defaultValue={categoriaUrl || "todos"} className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-8">
+                <TabsTrigger value="todos">Todos</TabsTrigger>
+                <TabsTrigger value="Pizza Salgadas">Pizza Salgadas</TabsTrigger>
+                <TabsTrigger value="Pizza Doces">Pizza Doces</TabsTrigger>
+                <TabsTrigger value="Bebida">Bebidas</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="todos" className="space-y-16">
+                {categorias.map((categoria) => {
+                  const produtosCategoria = getProdutosPorCategoria(categoria);
+                  if (produtosCategoria.length === 0) return null;
 
-                return (
-                  <section key={categoria}>
-                    <h2 className="text-3xl font-bold mb-8 text-center">
-                      <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                        {categoria}
-                      </span>
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {produtosCategoria.map((produto) => (
-                        <ProductCard key={produto.id} produto={produto} />
-                      ))}
-                    </div>
-                  </section>
-                );
-              })}
-            </div>
+                  return (
+                    <section key={categoria}>
+                      <h2 className="text-3xl font-bold mb-8 text-center">
+                        <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                          {categoria}
+                        </span>
+                      </h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {produtosCategoria.map((produto) => (
+                          <ProductCard key={produto.id} produto={produto} />
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
+              </TabsContent>
+
+              {categorias.map((categoria) => (
+                <TabsContent key={categoria} value={categoria}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {getProdutosPorCategoria(categoria).map((produto) => (
+                      <ProductCard key={produto.id} produto={produto} />
+                    ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
           )}
         </div>
       </main>
