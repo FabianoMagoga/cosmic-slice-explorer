@@ -26,7 +26,7 @@ const Hero = () => {
       <div className="container mx-auto px-4 z-10 text-center">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-pulse-slow">
-            Universo da Pizza
+            Planetas das Pizzas
           </h1>
           
           <p className="text-xl md:text-2xl mb-8 text-foreground/90 leading-relaxed">

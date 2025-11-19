@@ -11,7 +11,7 @@ const Sobre = () => {
       <main className="container mx-auto px-4 py-24">
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Sobre o Universo da Pizza
+            Sobre o Planetas das Pizzas
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Uma viagem gastronômica que começou há anos e continua conquistando paladares em toda a galáxia
@@ -28,7 +28,7 @@ const Sobre = () => {
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground">
               <p className="text-lg leading-relaxed">
-                O <span className="text-primary font-semibold">Universo da Pizza</span> nasceu da paixão pela gastronomia e do sonho de criar um lugar onde cada pizza é uma experiência única. Inspirados pela imensidão do cosmos, criamos um cardápio que orbita ao redor do sabor, da qualidade e da criatividade.
+                O <span className="text-primary font-semibold">Planetas das Pizzas</span> nasceu da paixão pela gastronomia e do sonho de criar um lugar onde cada pizza é uma experiência única. Inspirados pela imensidão do cosmos, criamos um cardápio que orbita ao redor do sabor, da qualidade e da criatividade.
               </p>
               <p className="text-lg leading-relaxed">
                 Cada receita é cuidadosamente elaborada com ingredientes selecionados, massa artesanal e muito amor. Nossa missão é levar felicidade através de sabores que explodem como estrelas no seu paladar.

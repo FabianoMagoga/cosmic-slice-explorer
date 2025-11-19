@@ -62,7 +62,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              Universo da Pizza
+              Planetas das Pizzas
             </h2>
           </div>
 
