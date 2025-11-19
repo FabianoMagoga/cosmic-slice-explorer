@@ -7,14 +7,16 @@ const PlanetsSection = () => {
       name: "Terra",
       description: "O planeta das pizzas salgadas, onde os ingredientes se unem em perfeita harmonia.",
       planetColor: "hsl(210 70% 55%)",
-      delay: "0s"
+      delay: "0s",
+      category: "Pizza Salgadas"
     },
     {
       icon: "🔴",
       name: "Marte",
       description: "Lar das pizzas doces, criadas para quem ama aventuras açucaradas.",
       planetColor: "hsl(15 85% 60%)",
-      delay: "0.2s"
+      delay: "0.2s",
+      category: "Pizza Doces"
     },
     {
       icon: "🪐",
@@ -28,7 +30,8 @@ const PlanetsSection = () => {
       name: "Júpiter",
       description: "Gigante das bebidas, refrescantes como um mergulho no espaço sideral.",
       planetColor: "hsl(35 70% 58%)",
-      delay: "0.6s"
+      delay: "0.6s",
+      category: "Bebida"
     },
     {
       icon: "☿️",

@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import heroCosmic from "@/assets/hero-cosmic-pizza.jpg";
 
 const Hero = () => {
-  const navigate = useNavigate();
+  const scrollToPlanets = () => {
+    const planetsSection = document.getElementById('planetas');
+    if (planetsSection) {
+      planetsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -38,7 +42,7 @@ const Hero = () => {
           <Button 
             size="lg" 
             className="text-lg px-8 py-6 glow-sun bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
-            onClick={() => navigate('/menu')}
+            onClick={scrollToPlanets}
           >
             Explorar o Menu
           </Button>

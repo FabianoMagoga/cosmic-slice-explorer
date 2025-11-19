@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -8,16 +9,27 @@ interface PlanetCardProps {
   description: string;
   planetColor: string;
   delay?: string;
+  category?: string;
 }
 
-const PlanetCard = ({ icon, name, description, planetColor, delay = "0s" }: PlanetCardProps) => {
+const PlanetCard = ({ icon, name, description, planetColor, delay = "0s", category }: PlanetCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (category) {
+      navigate(`/menu?categoria=${encodeURIComponent(category)}`);
+    }
+  };
+
   return (
     <Card 
       className={cn(
         "relative overflow-hidden border-2 transition-all duration-300 hover:scale-105 glow-planet",
-        "bg-card/50 backdrop-blur-sm hover:border-accent"
+        "bg-card/50 backdrop-blur-sm hover:border-accent",
+        category && "cursor-pointer"
       )}
       style={{ animationDelay: delay }}
+      onClick={handleClick}
     >
       <div 
         className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
