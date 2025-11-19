@@ -10,13 +10,16 @@ interface PlanetCardProps {
   planetColor: string;
   delay?: string;
   category?: string;
+  route?: string;
 }
 
-const PlanetCard = ({ icon, name, description, planetColor, delay = "0s", category }: PlanetCardProps) => {
+const PlanetCard = ({ icon, name, description, planetColor, delay = "0s", category, route }: PlanetCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (category) {
+    if (route) {
+      navigate(route);
+    } else if (category) {
       navigate(`/menu?categoria=${encodeURIComponent(category)}`);
     }
   };
@@ -26,7 +29,7 @@ const PlanetCard = ({ icon, name, description, planetColor, delay = "0s", catego
       className={cn(
         "relative overflow-hidden border-2 transition-all duration-300 hover:scale-105 glow-planet",
         "bg-card/50 backdrop-blur-sm hover:border-accent",
-        category && "cursor-pointer"
+        (category || route) && "cursor-pointer"
       )}
       style={{ animationDelay: delay }}
       onClick={handleClick}

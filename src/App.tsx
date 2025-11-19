@@ -8,6 +8,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Checkout from "./pages/Checkout";
+import Combos from "./pages/Combos";
+import Promocoes from "./pages/Promocoes";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
@@ -25,6 +27,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/menu" element={<Menu />} />
+              <Route path="/combos" element={<Combos />} />
+              <Route path="/promocoes" element={<Promocoes />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<AdminPanel />} />
