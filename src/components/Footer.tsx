@@ -3,7 +3,7 @@ const Footer = () => {
     <footer className="py-12 px-4 border-t border-border/50 bg-card/30 backdrop-blur-sm">
       <div className="container mx-auto text-center">
         <div className="mb-6">
-          <h3 className="text-3xl font-bold mb-2 text-primary">Universo da Pizza</h3>
+          <h3 className="text-3xl font-bold mb-2 text-primary">Planetas das Pizzas</h3>
           <p className="text-muted-foreground">
             Em cada fatia, uma viagem. Em cada mordida, uma nova constelação de sabores.
           </p>
@@ -11,7 +11,7 @@ const Footer = () => {
         
         <div className="max-w-2xl mx-auto mb-8">
           <p className="text-foreground/80 leading-relaxed">
-            Porque aqui, no Universo da Pizza, não há limite para a imaginação — nem para o apetite! 🌌🍕
+            Porque aqui, no Planetas das Pizzas, não há limite para a imaginação — nem para o apetite! 🌌🍕
           </p>
         </div>
         
@@ -26,7 +26,7 @@ const Footer = () => {
         </div>
         
         <div className="text-sm text-muted-foreground">
-          © 2024 Universo da Pizza. Todos os direitos reservados.
+          © 2024 Planetas das Pizzas. Todos os direitos reservados.
         </div>
       </div>
     </footer>
