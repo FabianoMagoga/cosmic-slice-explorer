@@ -25,7 +25,7 @@ const Hero = () => {
       
       <div className="container mx-auto px-4 z-10 text-center">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-pulse-slow">
+          <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-pulse-slow drop-shadow-[0_0_30px_rgba(168,85,247,0.5)]">
             Planetas das Pizzas
           </h1>
           
