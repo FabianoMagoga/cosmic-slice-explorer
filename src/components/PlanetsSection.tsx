@@ -23,7 +23,8 @@ const PlanetsSection = () => {
       name: "Saturno",
       description: "O reino dos combos especiais, perfeitos para compartilhar em qualquer galáxia.",
       planetColor: "hsl(45 75% 65%)",
-      delay: "0.4s"
+      delay: "0.4s",
+      route: "/combos"
     },
     {
       icon: "🪩",
@@ -38,7 +39,8 @@ const PlanetsSection = () => {
       name: "Mercúrio",
       description: "O planeta mais veloz, cheio de cupons e promoções que passam como cometas!",
       planetColor: "hsl(0 70% 65%)",
-      delay: "0.8s"
+      delay: "0.8s",
+      route: "/promocoes"
     }
   ];
 
