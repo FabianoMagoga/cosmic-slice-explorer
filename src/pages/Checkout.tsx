@@ -10,23 +10,14 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { checkoutSchema, type CheckoutFormData } from "@/schemas/checkoutSchema";
 
 const Checkout = () => {
   const { items, total, clearCart } = useCart();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-
-  // Garantir sessão anônima para clientes
-  useEffect(() => {
-    const ensureAnonymousSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        await supabase.auth.signInAnonymously();
-      }
-    };
-    ensureAnonymousSession();
-  }, []);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -51,8 +42,55 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({});
 
     try {
+      // Validar dados do formulário
+      const validation = checkoutSchema.safeParse({
+        ...formData,
+        endereco: formData.modo === "ENTREGA" ? formData.endereco : undefined
+      });
+
+      if (!validation.success) {
+        const fieldErrors: Record<string, string> = {};
+        validation.error.issues.forEach((err) => {
+          const path = err.path.join('.');
+          fieldErrors[path] = err.message;
+        });
+        setErrors(fieldErrors);
+        toast({
+          title: "Erro de validação",
+          description: "Por favor, corrija os campos destacados.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Garantir usuário autenticado (não anônimo)
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // Criar conta de cliente com email temporário
+        const tempEmail = `${formData.cpf}@cliente.temp`;
+        const tempPassword = `${formData.cpf}${Date.now()}`;
+        
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: tempEmail,
+          password: tempPassword,
+          options: {
+            data: {
+              tipo: 'cliente',
+              nome: formData.nome,
+              cpf: formData.cpf
+            }
+          }
+        });
+
+        if (signUpError) {
+          throw new Error('Erro ao criar sessão de cliente');
+        }
+      }
       // Criar cliente
       const { data: clienteData, error: clienteError } = await supabase
         .from("clientes")
@@ -149,25 +187,34 @@ const Checkout = () => {
                         required
                         value={formData.nome}
                         onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                        className={errors.nome ? 'border-destructive' : ''}
                       />
+                      {errors.nome && <p className="text-sm text-destructive mt-1">{errors.nome}</p>}
                     </div>
                     <div>
-                      <Label htmlFor="cpf">CPF</Label>
+                      <Label htmlFor="cpf">CPF (apenas números)</Label>
                       <Input
                         id="cpf"
                         required
+                        placeholder="12345678900"
                         value={formData.cpf}
-                        onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, cpf: e.target.value.replace(/\D/g, '') })}
+                        maxLength={11}
+                        className={errors.cpf ? 'border-destructive' : ''}
                       />
+                      {errors.cpf && <p className="text-sm text-destructive mt-1">{errors.cpf}</p>}
                     </div>
                     <div>
-                      <Label htmlFor="telefone">Telefone</Label>
+                      <Label htmlFor="telefone">Telefone (opcional)</Label>
                       <Input
                         id="telefone"
-                        required
+                        placeholder="1199999999"
                         value={formData.telefone}
-                        onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, telefone: e.target.value.replace(/\D/g, '') })}
+                        maxLength={11}
+                        className={errors.telefone ? 'border-destructive' : ''}
                       />
+                      {errors.telefone && <p className="text-sm text-destructive mt-1">{errors.telefone}</p>}
                     </div>
                   </CardContent>
                 </Card>
