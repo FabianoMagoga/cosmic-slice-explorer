@@ -1,11 +1,46 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const encoder = new TextEncoder();
+
+function generateSalt(length = 16): string {
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+async function hashPassword(password: string, salt?: string): Promise<string> {
+  const actualSalt = salt ?? generateSalt(16);
+  const data = encoder.encode(password + actualSalt);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return `sha256$${actualSalt}$${hashHex}`;
+}
+
+async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+  if (storedHash.startsWith('sha256$')) {
+    const parts = storedHash.split('$');
+    if (parts.length !== 3) return false;
+
+    const [, salt, hash] = parts;
+    const data = encoder.encode(password + salt);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+
+    return hashHex === hash;
+  }
+
+  // Legacy: senhas antigas em texto plano
+  return storedHash === password;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -25,8 +60,8 @@ serve(async (req) => {
       const { data: funcionario, error } = await supabaseClient
         .from('funcionarios')
         .select('*')
-        .eq('usuario', usuario)
         .eq('ativo', true)
+        .ilike('usuario', usuario)
         .single();
 
       if (error || !funcionario) {
@@ -36,14 +71,16 @@ serve(async (req) => {
         );
       }
 
-      // Verificar senha (suporta texto plano legado e bcrypt)
-      let senhaValida = false;
-      if (funcionario.senha.startsWith('$2')) {
-        // Senha hasheada com bcrypt
-        senhaValida = await bcrypt.compare(senha, funcionario.senha);
-      } else {
-        // Senha em texto plano (legado - inseguro)
-        senhaValida = funcionario.senha === senha;
+      // Verificar senha (suporta texto plano legado e hash SHA-256 com salt)
+      const senhaValida = await verifyPassword(senha, funcionario.senha);
+
+      // Se a senha estava em texto plano e for válida, atualiza para hash seguro
+      if (senhaValida && !funcionario.senha.startsWith('sha256$')) {
+        const novaSenhaHasheada = await hashPassword(senha);
+        await supabaseClient
+          .from('funcionarios')
+          .update({ senha: novaSenhaHasheada })
+          .eq('id', funcionario.id);
       }
 
       if (!senhaValida) {
@@ -89,8 +126,8 @@ serve(async (req) => {
         );
       }
 
-      // Hashear senha com bcrypt
-      const senhaHasheada = await bcrypt.hash(senha);
+      // Hashear senha com SHA-256 + salt
+      const senhaHasheada = await hashPassword(senha);
 
       const { data: novoFuncionario, error: createError } = await supabaseClient
         .from('funcionarios')
