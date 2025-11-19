@@ -2,17 +2,40 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 
-// Importar imagens específicas de pizzas
+// Pizzas Salgadas
 import quatroQueijosImg from "@/assets/pizzas/4-queijos.jpg";
+import cincoQueijosImg from "@/assets/pizzas/5-queijos.jpg";
+import americanaImg from "@/assets/pizzas/americana.jpg";
+import atumImg from "@/assets/pizzas/atum.jpg";
+import brocolisImg from "@/assets/pizzas/brocolis.jpg";
 import calabresaImg from "@/assets/pizzas/calabresa.jpg";
+import calabresaCheddarImg from "@/assets/pizzas/calabresa-cheddar.jpg";
+import calabresaQueijoImg from "@/assets/pizzas/calabresa-queijo.jpg";
+import chicagoImg from "@/assets/pizzas/chicago.jpg";
+import doritosImg from "@/assets/pizzas/doritos.jpg";
+import frangoBaconImg from "@/assets/pizzas/frango-bacon.jpg";
 import frangoCatupiry from "@/assets/pizzas/frango-catupiry.jpg";
+import frangoCatupirBaconImg from "@/assets/pizzas/frango-catupiry-bacon.jpg";
+import frangoCheddarImg from "@/assets/pizzas/frango-cheddar.jpg";
+import laBonissimaImg from "@/assets/pizzas/la-bonissima.jpg";
+import modaCasaImg from "@/assets/pizzas/moda-casa.jpg";
+import modaChefeImg from "@/assets/pizzas/moda-chefe.jpg";
 import mussarelaImg from "@/assets/pizzas/mussarela.jpg";
 import portuguesaImg from "@/assets/pizzas/portuguesa.jpg";
-import chocolateImg from "@/assets/pizzas/chocolate.jpg";
-import chocolateMorangoImg from "@/assets/pizzas/chocolate-morango.jpg";
+import strogonoffImg from "@/assets/pizzas/strogonoff.jpg";
+import toscanaImg from "@/assets/pizzas/toscana.jpg";
+
+// Pizzas Doces
 import bananaCaramelizadaImg from "@/assets/pizzas/banana-caramelizada.jpg";
-import calabresaCheddarImg from "@/assets/pizzas/calabresa-cheddar.jpg";
-import frangoBaconImg from "@/assets/pizzas/frango-bacon.jpg";
+import beijinhoImg from "@/assets/pizzas/beijinho.jpg";
+import chocolateImg from "@/assets/pizzas/chocolate.jpg";
+import chocolateBananaImg from "@/assets/pizzas/chocolate-banana.jpg";
+import chocolateMorangoImg from "@/assets/pizzas/chocolate-morango.jpg";
+import confeteImg from "@/assets/pizzas/confete.jpg";
+import creamCookiesImg from "@/assets/pizzas/cream-cookies.jpg";
+import doceLeiteImg from "@/assets/pizzas/doce-leite.jpg";
+import prestigioImg from "@/assets/pizzas/prestigio.jpg";
+import romeuJulietaImg from "@/assets/pizzas/romeu-julieta.jpg";
 
 // Imagens genéricas de fallback
 import pizzaSalgadaImg from "@/assets/pizza-salgada.jpg";
@@ -39,18 +62,42 @@ const ProductCard = ({ produto }: ProductCardProps) => {
   };
 
   const getImage = () => {
-    // Mapeamento de nomes de produtos para imagens específicas
+    // Mapeamento completo de nomes de produtos para imagens específicas
     const imageMap: Record<string, string> = {
+      // Pizzas Salgadas
       "4 Queijos": quatroQueijosImg,
+      "5 Queijos": cincoQueijosImg,
+      "Americana": americanaImg,
+      "Atum": atumImg,
+      "Brocolis": brocolisImg,
       "Calabresa": calabresaImg,
       "Calabresa com Cheddar": calabresaCheddarImg,
-      "Frango com Catupiry": frangoCatupiry,
+      "Calabresa com Queijo": calabresaQueijoImg,
+      "Chicago": chicagoImg,
+      "Doritos": doritosImg,
       "Frango com Bacon": frangoBaconImg,
+      "Frango com Catupiry": frangoCatupiry,
+      "Frango com Catupiry e Bacon": frangoCatupirBaconImg,
+      "Frango com Cheddar": frangoCheddarImg,
+      "La Bonissima": laBonissimaImg,
+      "Moda da Casa": modaCasaImg,
+      "Moda do Chefe": modaChefeImg,
       "Mussarela": mussarelaImg,
       "Portuguesa": portuguesaImg,
-      "Pizza Doces (Chocolate)": chocolateImg,
-      "Pizza Doces (Chocolate com Morango)": chocolateMorangoImg,
+      "Strogonoff": strogonoffImg,
+      "Toscana": toscanaImg,
+      
+      // Pizzas Doces
       "Pizza Doces (Banana Caramelizada)": bananaCaramelizadaImg,
+      "Pizza Doces (Beijinho)": beijinhoImg,
+      "Pizza Doces (Chocolate)": chocolateImg,
+      "Pizza Doces (Chocolate com Banana)": chocolateBananaImg,
+      "Pizza Doces (Chocolate com Morango)": chocolateMorangoImg,
+      "Pizza Doces (Confete)": confeteImg,
+      "Pizza Doces (Cream Cookies)": creamCookiesImg,
+      "Pizza Doces (Doce de Leite)": doceLeiteImg,
+      "Pizza Doces (Prestigio)": prestigioImg,
+      "Pizza Doces (Romeu e Julieta)": romeuJulietaImg,
     };
 
     // Primeiro tenta encontrar imagem específica pelo nome exato
