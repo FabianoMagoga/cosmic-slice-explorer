@@ -18,8 +18,7 @@ const Header = () => {
   const menuItems = [
     { label: "Início", href: "/", isRoute: true },
     { label: "Planetas", href: "#planetas", isRoute: false },
-    { label: "Sobre", href: "#sobre", isRoute: false },
-    { label: "Contato", href: "#contato", isRoute: false },
+    { label: "Sobre", href: "/sobre", isRoute: true },
   ];
 
   const categorias = [
