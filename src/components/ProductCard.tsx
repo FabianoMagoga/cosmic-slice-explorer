@@ -1,6 +1,20 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
+
+// Importar imagens específicas de pizzas
+import quatroQueijosImg from "@/assets/pizzas/4-queijos.jpg";
+import calabresaImg from "@/assets/pizzas/calabresa.jpg";
+import frangoCatupiry from "@/assets/pizzas/frango-catupiry.jpg";
+import mussarelaImg from "@/assets/pizzas/mussarela.jpg";
+import portuguesaImg from "@/assets/pizzas/portuguesa.jpg";
+import chocolateImg from "@/assets/pizzas/chocolate.jpg";
+import chocolateMorangoImg from "@/assets/pizzas/chocolate-morango.jpg";
+import bananaCaramelizadaImg from "@/assets/pizzas/banana-caramelizada.jpg";
+import calabresaCheddarImg from "@/assets/pizzas/calabresa-cheddar.jpg";
+import frangoBaconImg from "@/assets/pizzas/frango-bacon.jpg";
+
+// Imagens genéricas de fallback
 import pizzaSalgadaImg from "@/assets/pizza-salgada.jpg";
 import pizzaDoceImg from "@/assets/pizza-doce.jpg";
 import bebidaImg from "@/assets/bebida.jpg";
@@ -25,6 +39,26 @@ const ProductCard = ({ produto }: ProductCardProps) => {
   };
 
   const getImage = () => {
+    // Mapeamento de nomes de produtos para imagens específicas
+    const imageMap: Record<string, string> = {
+      "4 Queijos": quatroQueijosImg,
+      "Calabresa": calabresaImg,
+      "Calabresa com Cheddar": calabresaCheddarImg,
+      "Frango com Catupiry": frangoCatupiry,
+      "Frango com Bacon": frangoBaconImg,
+      "Mussarela": mussarelaImg,
+      "Portuguesa": portuguesaImg,
+      "Pizza Doces (Chocolate)": chocolateImg,
+      "Pizza Doces (Chocolate com Morango)": chocolateMorangoImg,
+      "Pizza Doces (Banana Caramelizada)": bananaCaramelizadaImg,
+    };
+
+    // Primeiro tenta encontrar imagem específica pelo nome exato
+    if (imageMap[produto.nome]) {
+      return imageMap[produto.nome];
+    }
+
+    // Se não encontrar, usa imagem genérica por categoria
     switch (produto.categoria) {
       case "Pizza Salgadas":
         return pizzaSalgadaImg;
