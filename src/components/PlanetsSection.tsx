@@ -27,7 +27,7 @@ const PlanetsSection = () => {
       route: "/combos"
     },
     {
-      icon: "🥤",
+      icon: "🌕",
       name: "Júpiter",
       description: "Gigante das bebidas, refrescantes como um mergulho no espaço sideral.",
       planetColor: "hsl(35 70% 58%)",
@@ -35,7 +35,7 @@ const PlanetsSection = () => {
       category: "Bebida"
     },
     {
-      icon: "⚡",
+      icon: "🌑",
       name: "Mercúrio",
       description: "O planeta mais veloz, cheio de cupons e promoções que passam como cometas!",
       planetColor: "hsl(0 70% 65%)",
