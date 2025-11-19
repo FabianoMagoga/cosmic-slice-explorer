@@ -99,16 +99,16 @@ const ProductCard = ({ produto }: ProductCardProps) => {
       "Toscana": toscanaImg,
       
       // Pizzas Doces
-      "Pizza Doces (Banana Caramelizada)": bananaCaramelizadaImg,
-      "Pizza Doces (Beijinho)": beijinhoImg,
-      "Pizza Doces (Chocolate)": chocolateImg,
-      "Pizza Doces (Chocolate com Banana)": chocolateBananaImg,
-      "Pizza Doces (Chocolate com Morango)": chocolateMorangoImg,
-      "Pizza Doces (Confete)": confeteImg,
-      "Pizza Doces (Cream Cookies)": creamCookiesImg,
-      "Pizza Doces (Doce de Leite)": doceLeiteImg,
-      "Pizza Doces (Prestigio)": prestigioImg,
-      "Pizza Doces (Romeu e Julieta)": romeuJulietaImg,
+      "Pizza Doce (Banana Caramelizada)": bananaCaramelizadaImg,
+      "Pizza Doce (Beijinho)": beijinhoImg,
+      "Pizza Doce (Chocolate)": chocolateImg,
+      "Pizza Doce (Chocolate com Banana)": chocolateBananaImg,
+      "Pizza Doce (Chocolate com Morango)": chocolateMorangoImg,
+      "Pizza Doce (Confete)": confeteImg,
+      "Pizza Doce (Cream Cookies)": creamCookiesImg,
+      "Pizza Doce (Doce de Leite)": doceLeiteImg,
+      "Pizza Doce (Prestigio)": prestigioImg,
+      "Pizza Doce (Romeu e Julieta)": romeuJulietaImg,
 
       // Bebidas
       "Agua Mineral 500ml": aguaMineral500mlImg,
