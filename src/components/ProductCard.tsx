@@ -37,6 +37,17 @@ import doceLeiteImg from "@/assets/pizzas/doce-leite.jpg";
 import prestigioImg from "@/assets/pizzas/prestigio.jpg";
 import romeuJulietaImg from "@/assets/pizzas/romeu-julieta.jpg";
 
+// Bebidas
+import aguaMineral500mlImg from "@/assets/bebidas/agua-mineral-500ml.jpg";
+import cerveja600mlImg from "@/assets/bebidas/cerveja-600ml.jpg";
+import cervejaLataImg from "@/assets/bebidas/cerveja-lata.jpg";
+import cervejaLongNeckImg from "@/assets/bebidas/cerveja-long-neck.jpg";
+import refrigerante1lImg from "@/assets/bebidas/refrigerante-1l.jpg";
+import refrigerante2lImg from "@/assets/bebidas/refrigerante-2l.jpg";
+import refrigerante600mlImg from "@/assets/bebidas/refrigerante-600ml.jpg";
+import refrigeranteLataImg from "@/assets/bebidas/refrigerante-lata.jpg";
+import suco300mlImg from "@/assets/bebidas/suco-300ml.jpg";
+
 // Imagens genéricas de fallback
 import pizzaSalgadaImg from "@/assets/pizza-salgada.jpg";
 import pizzaDoceImg from "@/assets/pizza-doce.jpg";
@@ -98,6 +109,17 @@ const ProductCard = ({ produto }: ProductCardProps) => {
       "Pizza Doces (Doce de Leite)": doceLeiteImg,
       "Pizza Doces (Prestigio)": prestigioImg,
       "Pizza Doces (Romeu e Julieta)": romeuJulietaImg,
+
+      // Bebidas
+      "Agua Mineral 500ml": aguaMineral500mlImg,
+      "Cerveja 600ml": cerveja600mlImg,
+      "Cerveja Lata": cervejaLataImg,
+      "Cerveja Long Neck": cervejaLongNeckImg,
+      "Refrigerante 1L": refrigerante1lImg,
+      "Refrigerante 2L": refrigerante2lImg,
+      "Refrigerante 600ml": refrigerante600mlImg,
+      "Refrigerante Lata": refrigeranteLataImg,
+      "Suco 300ml - Sabores": suco300mlImg,
     };
 
     // Primeiro tenta encontrar imagem específica pelo nome exato
