@@ -47,7 +47,7 @@ const PlanetCard = ({ icon, name, description, planetColor, delay = "0s", catego
           )}>
             {icon}
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-400 bg-clip-text text-transparent">
             {name}
           </CardTitle>
         </div>
