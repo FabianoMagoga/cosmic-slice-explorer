@@ -1,11 +1,3 @@
-✅ README.md – Cosmic Slice Explorer (Planet Pizza)
-
-**Pronto para colar no seu GitHub:
-
-https://github.com/FabianoMagoga/cosmic-slice-explorer**
-
-⸻
-
 🌌 Cosmic Slice Explorer – Planet Pizza
 
 Interface completa e imersiva inspirada no Sistema Solar, permitindo que clientes explorem pizzas, bebidas, combos e promoções de forma interativa.
@@ -55,6 +47,11 @@ Acesse: https://cosmic-slice-explorer.vercel.app
 👨‍🚀 Área Administrativa
 
 ✔ Login seguro com edge function + senha hash
+para o login do administrativo 
+
+login: admin@planetpizza.com
+senha: 123456
+
 ✔ CRUD completo de:
 	•	Produtos
 	•	Combos
@@ -148,7 +145,7 @@ src/
 
 Este projeto é de uso acadêmico e pessoal de Fabiano Magoga.
 
-
+⸻
 
 📬 Autores 
 
