@@ -1,73 +1,162 @@
-# Welcome to your Lovable project
+✅ README.md – Cosmic Slice Explorer (Planet Pizza)
 
-## Project info
+**Pronto para colar no seu GitHub:
 
-**URL**: https://lovable.dev/projects/453a9462-b544-45fa-96df-8c61104bd583
+https://github.com/FabianoMagoga/cosmic-slice-explorer**
 
-## How can I edit this code?
+⸻
 
-There are several ways of editing your application.
+🌌 Cosmic Slice Explorer – Planet Pizza
 
-**Use Lovable**
+Interface completa e imersiva inspirada no Sistema Solar, permitindo que clientes explorem pizzas, bebidas, combos e promoções de forma interativa.
+Inclui também área administrativa profissional, com gerenciamento total de produtos, pedidos, combos, cupons, funcionários e faturamento.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/453a9462-b544-45fa-96df-8c61104bd583) and start prompting.
+⸻
 
-Changes made via Lovable will be committed automatically to this repo.
+🚀 ✨ Demonstração
 
-**Use your preferred IDE**
+Acesse: https://cosmic-slice-explorer.vercel.app
+(ou o link que você tiver configurado)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+⸻
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+📂 Tecnologias utilizadas
+	•	React + Vite
+	•	TypeScript
+	•	TailwindCSS + ShadCN UI
+	•	Supabase (Banco de dados + Autenticação + Storage)
+	•	React Query
+	•	Lucide Icons
+	•	Supabase Edge Functions para login seguro
+	•	LocalStorage para carrinho e pedido finalizado
 
-Follow these steps:
+⸻
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+🛰️ Funcionalidades
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+🪐 Setor do Cliente
 
-# Step 3: Install the necessary dependencies.
-npm i
+✔ Sistema Solar animado
+✔ Navegação por planetas
+✔ Cardápio completo dividido por categorias
+	•	Terra → Pizzas Salgadas
+	•	Marte → Pizzas Doces
+	•	Netuno → Bebidas
+	•	Júpiter → Combos Premium
+	•	Mercúrio → Promoções Relâmpago
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+✔ Carrinho de compras
+✔ Checkout com envio automático via WhatsApp
+✔ Tela de pedido finalizado
+✔ Tema totalmente cósmico
+
+⸻
+
+👨‍🚀 Área Administrativa
+
+✔ Login seguro com edge function + senha hash
+✔ CRUD completo de:
+	•	Produtos
+	•	Combos
+	•	Pedidos
+	•	Cupons
+	•	Funcionários
+	•	Faturamento
+	•	Configurações da pizzaria
+
+✔ Relatório de vendas + exportação CSV
+✔ Botões funcionais em todas as telas
+✔ Painel profissional e responsivo
+
+⸻
+
+🔧 Como rodar o projeto localmente
+
+git clone https://github.com/FabianoMagoga/cosmic-slice-explorer
+cd cosmic-slice-explorer
+npm install
 npm run dev
-```
 
-**Edit a file directly in GitHub**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+⸻
 
-**Use GitHub Codespaces**
+🔑 Configuração do Supabase
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Crie um arquivo .env na raiz do projeto com:
 
-## What technologies are used for this project?
+VITE_SUPABASE_URL=cole_aqui
+VITE_SUPABASE_ANON_KEY=cole_aqui
 
-This project is built with:
+Se você usa função de admin-auth:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
 
-## How can I deploy this project?
+(O service role é usado apenas na edge function, nunca no frontend.)
 
-Simply open [Lovable](https://lovable.dev/projects/453a9462-b544-45fa-96df-8c61104bd583) and click on Share -> Publish.
+⸻
 
-## Can I connect a custom domain to my Lovable project?
+⚙️ Build para produção
 
-Yes, you can!
+npm run build
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Saída ficará na pasta /dist.
+Você pode subir na Vercel, Netlify, AWS S3 ou qualquer host estático.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+⸻
+
+🧪 Testes recomendados
+	•	Navegar entre planetas
+	•	Adicionar itens ao carrinho
+	•	Finalizar pedido pelo WhatsApp
+	•	Testar login / logout admin
+	•	Cadastrar produto, combo, cupom e funcionário
+	•	Gerar relatório de vendas
+
+⸻
+
+📁 Estrutura do projeto (simplificada)
+
+src/
+ ├─ pages/
+ │   ├─ Index.tsx
+ │   ├─ Menu.tsx
+ │   ├─ AdminPanel.tsx
+ │   ├─ AdminProdutos.tsx
+ │   ├─ AdminPedidos.tsx
+ │   ├─ ...
+ │
+ ├─ components/
+ ├─ contexts/
+ ├─ integrations/
+ │   └─ supabase/
+ │       └─ client.ts
+ │
+ ├─ assets/
+ │   ├─ pizza-menu.png
+ │   ├─ sons/
+ │   ├─ planetas/
+ │
+ ├─ functions/ (opc.)
+ │   └─ admin-auth/
+ │       └─ index.ts
+
+
+⸻
+
+📄 Licença
+
+Este projeto é de uso acadêmico e pessoal de Fabiano Magoga.
+
+
+
+📬 Autores 
+
+Anderson Leal de Sousa
+Fabiano Eder Magoga
+Gabriel Ribeiro Azevedo
+Igor Gabrile Oliveira Alvez 
+Marilia Oliveira Sena 
+
+⸻
+
