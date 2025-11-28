@@ -1,104 +1,144 @@
-import { useEffect } from "react";
+// src/pages/AdminPanel.tsx
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
-  Users, Package, ShoppingBag, Tag, FileText, Download,
-  BarChart, TrendingUp, LogOut, UserPlus, Pizza, Gift
+  Pizza,
+  ShoppingBag,
+  Gift,
+  Users,
+  UserCog,
+  Settings,
+  Receipt,
+  PackageSearch,
+  LogOut,
 } from "lucide-react";
 
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+
 const AdminPanel = () => {
-  const { funcionario, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { toast } = useToast();
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  useEffect(() => {
-    if (!funcionario) {
-      navigate("/admin/login");
-    }
-  }, [funcionario, navigate]);
-
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
-  const adminFeatures = [
-    { icon: Users, title: "Cadastrar Cliente", desc: "Gerenciar clientes", path: "/admin/clientes" },
-    { icon: UserPlus, title: "Cadastrar Funcionário", desc: "Gerenciar funcionários", path: "/admin/funcionarios", adminOnly: true },
-    { icon: Package, title: "Cadastrar Produtos", desc: "Gerenciar produtos", path: "/admin/produtos" },
-    { icon: Pizza, title: "Cadastrar Combos", desc: "Criar combos promocionais", path: "/admin/combos" },
-    { icon: Tag, title: "Cadastrar Promoções", desc: "Gerenciar promoções", path: "/admin/promocoes" },
-    { icon: ShoppingBag, title: "Novo Pedido", desc: "Registrar pedido no balcão", path: "/admin/novo-pedido" },
-    { icon: FileText, title: "Cupom Fiscal", desc: "Extrair cupom fiscal", path: "/admin/cupom-fiscal" },
-    { icon: Download, title: "Exportar Dados", desc: "CSV/TXT de relatórios", path: "/admin/exportar" },
-    { icon: BarChart, title: "Relatório de Vendas", desc: "Análise de vendas", path: "/admin/relatorio-vendas" },
-    { icon: TrendingUp, title: "Relatório de Produtos", desc: "Produtos mais vendidos", path: "/admin/relatorio-produtos" },
-    { icon: Gift, title: "Relatório de Promoções", desc: "Efetividade das promoções", path: "/admin/relatorio-promocoes" },
+  const items = [
+    {
+      title: "Produtos",
+      description: "Gerencie pizzas, bebidas e outros itens do cardápio.",
+      icon: Pizza,
+      to: "/admin/produtos",
+    },
+    {
+      title: "Combos",
+      description: "Monte e edite combos promocionais.",
+      icon: ShoppingBag,
+      to: "/admin/combos",
+    },
+    {
+      title: "Cupons",
+      description: "Crie cupons de desconto para campanhas.",
+      icon: Gift,
+      to: "/admin/cupons",
+    },
+    {
+      title: "Clientes",
+      description: "Veja histórico e dados dos clientes.",
+      icon: Users,
+      to: "/admin/clientes",
+    },
+    {
+      title: "Funcionários",
+      description: "Gerencie cadastros e acessos de funcionários.",
+      icon: UserCog,
+      to: "/admin/funcionarios",
+    },
+    {
+      title: "Pedidos",
+      description: "Acompanhe os pedidos em tempo real.",
+      icon: PackageSearch,
+      to: "/admin/pedidos",
+    },
+    {
+      title: "Faturamento",
+      description: "Relatórios de vendas, ticket médio e muito mais.",
+      icon: Receipt,
+      to: "/admin/faturamento",
+    },
+    {
+      title: "Configurações",
+      description: "Dados da pizzaria, taxas, formas de pagamento.",
+      icon: Settings,
+      to: "/admin/config",
+    },
   ];
 
-  const filteredFeatures = isAdmin 
-    ? adminFeatures 
-    : adminFeatures.filter(f => !f.adminOnly);
-
-  if (!funcionario) return null;
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true);
+      await logout();
+      toast({
+        title: "Sessão encerrada",
+        description: "Você saiu do painel administrativo.",
+      });
+      navigate("/admin/login");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Painel Administrativo
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Bem-vindo, {funcionario.nome} ({funcionario.papel})
+    <div className="min-h-screen bg-slate-950/90 text-slate-50">
+      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between bg-slate-950/80 backdrop-blur">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+            Painel Administrativo
+          </p>
+          <h1 className="text-xl font-semibold">Planet Pizza • Sistema Solar</h1>
+          {user && (
+            <p className="text-xs text-slate-400 mt-1">
+              Logado como <span className="font-medium">{user.email}</span>
             </p>
-          </div>
-          <Button onClick={handleLogout} variant="outline">
-            <LogOut className="mr-2 h-4 w-4" />
-            Sair
-          </Button>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFeatures.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <Card
-                key={index}
-                className="hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer group"
-                onClick={() => navigate(feature.path)}
-              >
-                <CardHeader>
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="group-hover:text-primary transition-colors">
-                    {feature.title}
-                  </CardTitle>
-                  <CardDescription>{feature.desc}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="ghost" className="w-full">
-                    Acessar
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLogout}
+          disabled={loggingOut}
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          {loggingOut ? "Saindo..." : "Sair"}
+        </Button>
+      </header>
 
-        <div className="mt-8">
-          <Button
-            onClick={() => navigate("/")}
-            variant="outline"
-            className="w-full md:w-auto"
-          >
-            Voltar ao Site
-          </Button>
-        </div>
-      </div>
+      <main className="px-6 py-8 max-w-6xl mx-auto grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {items.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Card
+              key={item.title}
+              className="bg-slate-900/80 border-slate-800 hover:border-primary/70 cursor-pointer transition-all hover:shadow-lg"
+              onClick={() => navigate(item.to)}
+            >
+              <CardHeader className="flex flex-row items-center gap-3 pb-3">
+                <div className="p-2 rounded-full bg-slate-800">
+                  <Icon className="w-5 h-5" />
+                </div>
+                <CardTitle className="text-base">{item.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-slate-400">{item.description}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </main>
     </div>
   );
 };

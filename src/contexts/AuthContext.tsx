@@ -1,85 +1,110 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+// src/contexts/AuthContext.tsx
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 
-type Funcionario = {
+export type Funcionario = {
   id: string;
   usuario: string;
   nome: string;
-  papel: 'ADMIN' | 'ATENDENTE';
-  ativo: boolean;
+  cargo?: string;
+  criado_em?: string;
 };
 
 type AuthContextType = {
-  funcionario: Funcionario | null;
-  login: (usuario: string, senha: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  user: Funcionario | null;
   isAdmin: boolean;
+  loading: boolean;
+  login: (funcionario: Funcionario, isAdmin?: boolean) => void;
+  logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [funcionario, setFuncionario] = useState<Funcionario | null>(null);
+type AuthProviderProps = {
+  children: ReactNode;
+};
 
+const STORAGE_USER_KEY = "planetpizza_admin_user";
+const STORAGE_ADMIN_FLAG_KEY = "planetpizza_is_admin";
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [user, setUser] = useState<Funcionario | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
+
+  // Carrega sessão do localStorage quando o app inicia
   useEffect(() => {
-    // Verificar se há funcionário logado no localStorage
-    const stored = localStorage.getItem('funcionario');
-    if (stored) {
-      try {
-        setFuncionario(JSON.parse(stored));
-      } catch (e) {
-        localStorage.removeItem('funcionario');
+    try {
+      const savedUser = localStorage.getItem(STORAGE_USER_KEY);
+      const savedAdminFlag = localStorage.getItem(STORAGE_ADMIN_FLAG_KEY);
+
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
       }
+
+      if (savedAdminFlag) {
+        setIsAdmin(savedAdminFlag === "true");
+      }
+    } catch (err) {
+      console.error("Erro ao carregar sessão:", err);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  const login = async (usuario: string, senha: string) => {
+  // Login chamado pelo AdminLogin.tsx
+  const login = (funcionario: Funcionario, adminFlag: boolean = true) => {
+    setUser(funcionario);
+    setIsAdmin(adminFlag);
+
     try {
-      // Usar Edge Function para login seguro com bcrypt
-      const { data: { session } } = await supabase.auth.getSession();
-      const { data, error } = await supabase.functions.invoke('admin-auth', {
-        body: { action: 'login', usuario, senha }
-      });
-
-      if (error || !data?.success) {
-        return { success: false, error: data?.error || 'Usuário ou senha inválidos' };
-      }
-
-      const func: Funcionario = {
-        id: data.funcionario.id,
-        usuario: data.funcionario.usuario,
-        nome: data.funcionario.nome,
-        papel: data.funcionario.papel as 'ADMIN' | 'ATENDENTE',
-        ativo: data.funcionario.ativo
-      };
-
-      setFuncionario(func);
-      localStorage.setItem('funcionario', JSON.stringify(func));
-      return { success: true };
-    } catch (error) {
-      console.error('Erro no login:', error);
-      return { success: false, error: 'Erro ao fazer login' };
+      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(funcionario));
+      localStorage.setItem(STORAGE_ADMIN_FLAG_KEY, String(adminFlag));
+    } catch (err) {
+      console.error("Erro ao salvar sessão:", err);
     }
   };
 
+  // Logout usado no AdminPanel e onde mais precisar
   const logout = () => {
-    setFuncionario(null);
-    localStorage.removeItem('funcionario');
+    setUser(null);
+    setIsAdmin(false);
+
+    try {
+      localStorage.removeItem(STORAGE_USER_KEY);
+      localStorage.removeItem(STORAGE_ADMIN_FLAG_KEY);
+    } catch (err) {
+      console.error("Erro ao limpar sessão:", err);
+    }
   };
 
-  const isAdmin = funcionario?.papel === 'ADMIN';
-
   return (
-    <AuthContext.Provider value={{ funcionario, login, logout, isAdmin }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAdmin,
+        loading,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
+// Hookzinho para usar no app inteiro
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+  const ctx = useContext(AuthContext);
+
+  if (!ctx) {
+    throw new Error("useAuth deve ser usado dentro de <AuthProvider>");
   }
-  return context;
+
+  return ctx;
 };

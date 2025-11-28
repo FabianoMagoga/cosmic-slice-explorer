@@ -1,80 +1,78 @@
-import { createContext, useContext, useState, ReactNode } from "react";
-import { useToast } from "@/hooks/use-toast";
+// src/contexts/CartContext.tsx
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 
-type CartItem = {
+export type Produto = {
   id: string;
   nome: string;
-  categoria: "Pizza Salgadas" | "Pizza Doces" | "Bebida";
+  descricao?: string | null;
+  categoria?: string | null;
   preco: number;
+  imagem?: string | null;
+};
+
+export type CartItem = Produto & {
   quantidade: number;
 };
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (produto: { id: string; nome: string; categoria: "Pizza Salgadas" | "Pizza Doces" | "Bebida"; preco: number }) => void;
+  addItem: (produto: Produto) => void;
   removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantidade: number) => void;
   clearCart: () => void;
   total: number;
-  itemCount: number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const { toast } = useToast();
+  const [items, setItems] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem("planet-pizza-cart");
+      return saved ? (JSON.parse(saved) as CartItem[]) : [];
+    } catch {
+      return [];
+    }
+  });
 
-  console.log("CartProvider renderizado com", items.length, "itens");
+  useEffect(() => {
+    localStorage.setItem("planet-pizza-cart", JSON.stringify(items));
+  }, [items]);
 
-  const addItem = (produto: { id: string; nome: string; categoria: "Pizza Salgadas" | "Pizza Doces" | "Bebida"; preco: number }) => {
-    console.log("addItem chamado com:", produto);
-    setItems((current) => {
-      const existing = current.find((item) => item.id === produto.id);
-      if (existing) {
-        console.log("Item já existe no carrinho, aumentando quantidade");
-        return current.map((item) =>
-          item.id === produto.id
-            ? { ...item, quantidade: item.quantidade + 1 }
-            : item
-        );
+  const addItem = (produto: Produto) => {
+    setItems((prev) => {
+      const idx = prev.findIndex((p) => p.id === produto.id);
+      if (idx >= 0) {
+        const clone = [...prev];
+        clone[idx] = {
+          ...clone[idx],
+          quantidade: clone[idx].quantidade + 1,
+        };
+        return clone;
       }
-      console.log("Adicionando novo item ao carrinho");
-      return [...current, { ...produto, quantidade: 1 }];
-    });
-    
-    toast({
-      title: "Adicionado ao carrinho",
-      description: `${produto.nome} foi adicionado ao seu pedido`,
+      return [...prev, { ...produto, quantidade: 1 }];
     });
   };
 
   const removeItem = (id: string) => {
-    setItems((current) => current.filter((item) => item.id !== id));
+    setItems((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const updateQuantity = (id: string, quantidade: number) => {
-    if (quantidade <= 0) {
-      removeItem(id);
-      return;
-    }
-    setItems((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, quantidade } : item
-      )
-    );
-  };
+  const clearCart = () => setItems([]);
 
-  const clearCart = () => {
-    setItems([]);
-  };
-
-  const total = items.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
-  const itemCount = items.reduce((sum, item) => sum + item.quantidade, 0);
+  const total = items.reduce(
+    (sum, item) => sum + item.preco * item.quantidade,
+    0
+  );
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount }}
+      value={{ items, addItem, removeItem, clearCart, total }}
     >
       {children}
     </CartContext.Provider>
@@ -82,9 +80,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useCart = () => {
-  const context = useContext(CartContext);
-  if (!context) {
+  const ctx = useContext(CartContext);
+  if (!ctx) {
     throw new Error("useCart must be used within CartProvider");
   }
-  return context;
+  return ctx;
 };

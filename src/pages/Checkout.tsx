@@ -1,161 +1,193 @@
-import { useState, useEffect } from "react";
+// src/pages/Checkout.tsx
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { checkoutSchema, type CheckoutFormData } from "@/schemas/checkoutSchema";
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+
+const PIZZARIA_ENDERECO = "Rua Exemplo, 123 - Centro, Jundiaí - SP";
+const PIZZARIA_NOME = "Planet Pizza";
 
 const Checkout = () => {
   const { items, total, clearCart } = useCart();
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const [tipoPedido, setTipoPedido] = useState<"entrega" | "retirada">(
+    "entrega"
+  );
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [endereco, setEndereco] = useState("");
+  const [observacoes, setObservacoes] = useState("");
+  const [horarioDesejado, setHorarioDesejado] = useState("");
+  const [formaPagamento, setFormaPagamento] = useState<
+    "dinheiro" | "cartao" | "pix"
+  >("dinheiro");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState({
-    nome: "",
-    cpf: "",
-    telefone: "",
-    modo: "ENTREGA" as "ENTREGA" | "RETIRADA",
-    formaPagamento: "Dinheiro" as "Dinheiro" | "Credito" | "Debito" | "Pix" | "Vale refeicao" | "Alimentacao",
-    endereco: {
-      rua: "",
-      numero: "",
-      bairro: "",
-      cidade: "",
-      cep: "",
-    },
-  });
+  // taxa fixa de exemplo
+  const taxaEntrega = tipoPedido === "entrega" ? 8.9 : 0;
+  const totalGeral = total + taxaEntrega;
 
-  if (items.length === 0) {
-    navigate("/menu");
-    return null;
-  }
+  const validar = () => {
+    if (!nome.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Nome obrigatório",
+        description: "Informe seu nome para continuar.",
+      });
+      return false;
+    }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    if (!telefone.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Telefone obrigatório",
+        description: "Informe um telefone para contato.",
+      });
+      return false;
+    }
+
+    if (tipoPedido === "entrega" && !endereco.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Endereço obrigatório",
+        description: "Preencha o endereço para entrega.",
+      });
+      return false;
+    }
+
+    if (items.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Carrinho vazio",
+        description: "Adicione pelo menos um item antes de finalizar.",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleFinalizar = async () => {
+    if (!validar()) return;
+
     setLoading(true);
-    setErrors({});
 
     try {
-      // Validar dados do formulário
-      const validation = checkoutSchema.safeParse({
-        ...formData,
-        endereco: formData.modo === "ENTREGA" ? formData.endereco : undefined
-      });
+      // 1) Salvar no Supabase
+      const pedidoPayload = {
+        tipo_pedido: tipoPedido,
+        nome_cliente: nome,
+        telefone,
+        endereco: tipoPedido === "entrega" ? endereco : null,
+        observacoes: observacoes || null,
+        horario_desejado: horarioDesejado || null,
+        taxa_entrega: taxaEntrega,
+        total: totalGeral,
+        forma_pagamento: formaPagamento, // coluna text no banco
+        status: "novo", // coluna text no banco
+        itens: items.map((item) => ({
+          produto_id: item.id,
+          nome: item.nome,
+          quantidade: item.quantidade,
+          preco_unitario: item.preco,
+          subtotal: item.preco * item.quantidade,
+        })),
+      };
 
-      if (!validation.success) {
-        const fieldErrors: Record<string, string> = {};
-        validation.error.issues.forEach((err) => {
-          const path = err.path.join('.');
-          fieldErrors[path] = err.message;
-        });
-        setErrors(fieldErrors);
+      const { error } = await supabase.from("pedidos").insert(pedidoPayload);
+
+      if (error) {
+        console.error(error);
         toast({
-          title: "Erro de validação",
-          description: "Por favor, corrija os campos destacados.",
           variant: "destructive",
+          title: "Erro ao finalizar pedido",
+          description: error.message,
         });
         setLoading(false);
         return;
       }
 
-      // Garantir usuário autenticado (não anônimo)
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        // Criar conta de cliente com email temporário
-        const tempEmail = `${formData.cpf}@cliente.temp`;
-        const tempPassword = `${formData.cpf}${Date.now()}`;
-        
-        const { error: signUpError } = await supabase.auth.signUp({
-          email: tempEmail,
-          password: tempPassword,
-          options: {
-            data: {
-              tipo: 'cliente',
-              nome: formData.nome,
-              cpf: formData.cpf
-            }
-          }
-        });
+      // 2) Montar mensagem para WhatsApp
+      const numeroWhatsApp = import.meta.env.VITE_WHATSAPP_NUMBER as
+        | string
+        | undefined;
 
-        if (signUpError) {
-          throw new Error('Erro ao criar sessão de cliente');
-        }
+      const linhasItens = items
+        .map(
+          (item) =>
+            `• ${item.nome}  x${item.quantidade}  (${formatCurrency(
+              item.preco * item.quantidade
+            )})`
+        )
+        .join("\n");
+
+      const formaPagamentoTexto =
+        formaPagamento === "dinheiro"
+          ? "Dinheiro"
+          : formaPagamento === "cartao"
+          ? "Cartão"
+          : "Pix";
+
+      const msg = [
+        `*${PIZZARIA_NOME}* - Novo pedido *${tipoPedido.toUpperCase()}*`,
+        "",
+        `*Cliente*: ${nome}`,
+        `*Telefone*: ${telefone}`,
+        tipoPedido === "entrega"
+          ? `*Endereço*: ${endereco}`
+          : `*Retirada no local*`,
+        horarioDesejado
+          ? `*Horário desejado*: ${horarioDesejado}`
+          : "*Horário*: o quanto antes",
+        `*Pagamento*: ${formaPagamentoTexto}`,
+        "",
+        "*Itens:*",
+        linhasItens,
+        "",
+        `*Total produtos*: ${formatCurrency(total)}`,
+        `*Taxa entrega*: ${formatCurrency(taxaEntrega)}`,
+        `*Total geral*: ${formatCurrency(totalGeral)}`,
+        "",
+        observacoes ? `*Obs*: ${observacoes}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      if (numeroWhatsApp) {
+        const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(
+          msg
+        )}`;
+        window.open(url, "_blank");
       }
-      // Criar cliente
-      const { data: clienteData, error: clienteError } = await supabase
-        .from("clientes")
-        .insert({
-          nome: formData.nome,
-          cpf: formData.cpf,
-          telefone: formData.telefone,
+
+      // 👇 salvar resumo do pedido para a tela de sucesso
+      localStorage.setItem(
+        "planetpizza_last_order",
+        JSON.stringify({
+          nome,
+          total: totalGeral,
+          forma_pagamento: formaPagamento,
         })
-        .select()
-        .single();
+      );
 
-      if (clienteError) throw clienteError;
-
-      // Obter próximo número de pedido
-      const { data: numeroData, error: numeroError } = await supabase
-        .rpc("next_pedido_numero");
-
-      if (numeroError) throw numeroError;
-
-      // Criar pedido
-      const { data: pedidoData, error: pedidoError } = await supabase
-        .from("pedidos")
-        .insert({
-          cliente_id: clienteData.id,
-          numero: numeroData,
-          subtotal: total,
-          total: total,
-          forma_pagamento: formData.formaPagamento,
-          modo: formData.modo,
-          endereco: formData.modo === "ENTREGA" ? formData.endereco : null,
-        })
-        .select()
-        .single();
-
-      if (pedidoError) throw pedidoError;
-
-      // Criar itens do pedido
-      const itensData = items.map((item) => ({
-        pedido_id: pedidoData.id,
-        produto_id: item.id,
-        nome_produto: item.nome,
-        categoria: item.categoria,
-        preco_unitario: item.preco,
-        qtd: item.quantidade,
-      }));
-
-      const { error: itensError } = await supabase
-        .from("itens_pedido")
-        .insert(itensData);
-
-      if (itensError) throw itensError;
-
-      toast({
-        title: "Pedido realizado com sucesso!",
-        description: `Seu pedido #${numeroData} foi registrado.`,
-      });
-
+      // 3) Limpar carrinho e ir para tela de sucesso
       clearCart();
-      navigate("/");
-    } catch (error) {
-      console.error("Erro ao criar pedido:", error);
+      navigate("/pedido-sucesso");
+    } catch (err: any) {
+      console.error(err);
       toast({
-        title: "Erro",
-        description: "Não foi possível finalizar o pedido.",
         variant: "destructive",
+        title: "Erro inesperado",
+        description: "Tente novamente em instantes.",
       });
     } finally {
       setLoading(false);
@@ -163,243 +195,243 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <Header />
-
-      <main className="pt-24 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent text-center">
-            Finalizar Pedido
+    <div className="min-h-screen bg-slate-950 text-slate-50 pb-16">
+      <div className="max-w-5xl mx-auto px-4 pt-10">
+        {/* Título */}
+        <div className="text-center mb-8">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+            Checkout
+          </p>
+          <h1 className="mt-2 text-3xl md:text-4xl font-bold">
+            Finalizar pedido
           </h1>
+          <p className="mt-2 text-sm text-slate-400">
+            Informe seus dados e revise seu pedido.
+          </p>
+        </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Dados Pessoais</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="nome">Nome Completo</Label>
-                      <Input
-                        id="nome"
-                        required
-                        value={formData.nome}
-                        onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                        className={errors.nome ? 'border-destructive' : ''}
-                      />
-                      {errors.nome && <p className="text-sm text-destructive mt-1">{errors.nome}</p>}
-                    </div>
-                    <div>
-                      <Label htmlFor="cpf">CPF (apenas números)</Label>
-                      <Input
-                        id="cpf"
-                        required
-                        placeholder="12345678900"
-                        value={formData.cpf}
-                        onChange={(e) => setFormData({ ...formData, cpf: e.target.value.replace(/\D/g, '') })}
-                        maxLength={11}
-                        className={errors.cpf ? 'border-destructive' : ''}
-                      />
-                      {errors.cpf && <p className="text-sm text-destructive mt-1">{errors.cpf}</p>}
-                    </div>
-                    <div>
-                      <Label htmlFor="telefone">Telefone (opcional)</Label>
-                      <Input
-                        id="telefone"
-                        placeholder="1199999999"
-                        value={formData.telefone}
-                        onChange={(e) => setFormData({ ...formData, telefone: e.target.value.replace(/\D/g, '') })}
-                        maxLength={11}
-                        className={errors.telefone ? 'border-destructive' : ''}
-                      />
-                      {errors.telefone && <p className="text-sm text-destructive mt-1">{errors.telefone}</p>}
-                    </div>
-                  </CardContent>
-                </Card>
+        <div className="grid gap-6 md:grid-cols-[2fr,1.5fr]">
+          {/* COLUNA ESQUERDA */}
+          <div className="bg-slate-900/70 rounded-2xl border border-slate-800 p-6 space-y-5">
+            <h2 className="text-xl font-bold mb-2">
+              {tipoPedido === "entrega"
+                ? "Dados para entrega"
+                : "Dados para retirada"}
+            </h2>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Modo de Entrega</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <RadioGroup
-                      value={formData.modo}
-                      onValueChange={(value) => {
-                        console.log("Modo alterado para:", value);
-                        setFormData({ ...formData, modo: value as "ENTREGA" | "RETIRADA" });
-                      }}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="ENTREGA" id="entrega" />
-                        <Label htmlFor="entrega">Entrega</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="RETIRADA" id="retirada" />
-                        <Label htmlFor="retirada">Retirada</Label>
-                      </div>
-                    </RadioGroup>
-                  </CardContent>
-                </Card>
-
-                {formData.modo === "ENTREGA" && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Endereço de Entrega</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <Label htmlFor="rua">Rua</Label>
-                        <Input
-                          id="rua"
-                          required
-                          value={formData.endereco.rua}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              endereco: { ...formData.endereco, rua: e.target.value },
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="numero">Número</Label>
-                          <Input
-                            id="numero"
-                            required
-                            value={formData.endereco.numero}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                endereco: { ...formData.endereco, numero: e.target.value },
-                              })
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="bairro">Bairro</Label>
-                          <Input
-                            id="bairro"
-                            required
-                            value={formData.endereco.bairro}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                endereco: { ...formData.endereco, bairro: e.target.value },
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="cidade">Cidade</Label>
-                          <Input
-                            id="cidade"
-                            required
-                            value={formData.endereco.cidade}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                endereco: { ...formData.endereco, cidade: e.target.value },
-                              })
-                            }
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="cep">CEP</Label>
-                          <Input
-                            id="cep"
-                            required
-                            value={formData.endereco.cep}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                endereco: { ...formData.endereco, cep: e.target.value },
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Forma de Pagamento</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <RadioGroup
-                      value={formData.formaPagamento}
-                      onValueChange={(value) => {
-                        console.log("Forma de pagamento alterada para:", value);
-                        setFormData({ ...formData, formaPagamento: value as any });
-                      }}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Dinheiro" id="dinheiro" />
-                        <Label htmlFor="dinheiro">Dinheiro</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Pix" id="pix" />
-                        <Label htmlFor="pix">Pix</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Credito" id="credito" />
-                        <Label htmlFor="credito">Cartão de Crédito</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Debito" id="debito" />
-                        <Label htmlFor="debito">Cartão de Débito</Label>
-                      </div>
-                    </RadioGroup>
-                  </CardContent>
-                </Card>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
-                  size="lg"
-                  disabled={loading}
+            {/* Tipo do pedido */}
+            <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-4 space-y-2">
+              <p className="text-sm font-medium mb-2">
+                Como deseja receber?
+              </p>
+              <div className="flex gap-3 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setTipoPedido("entrega")}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition ${
+                    tipoPedido === "entrega"
+                      ? "bg-amber-400 text-slate-950"
+                      : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                  }`}
                 >
-                  {loading ? "Processando..." : "Confirmar Pedido"}
-                </Button>
-              </form>
+                  Entrega
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTipoPedido("retirada")}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition ${
+                    tipoPedido === "retirada"
+                      ? "bg-amber-400 text-slate-950"
+                      : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                  }`}
+                >
+                  Retirada no local
+                </button>
+              </div>
+
+              {tipoPedido === "retirada" && (
+                <p className="mt-3 text-xs text-slate-400">
+                  Retirada em:{" "}
+                  <span className="font-semibold">
+                    {PIZZARIA_ENDERECO}
+                  </span>
+                </p>
+              )}
             </div>
 
-            <div>
-              <Card className="sticky top-24">
-                <CardHeader>
-                  <CardTitle>Resumo do Pedido</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span>
-                        {item.quantidade}x {item.nome}
-                      </span>
-                      <span className="font-semibold">
-                        R$ {(item.preco * item.quantidade).toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between text-xl font-bold">
-                      <span>Total:</span>
-                      <span className="text-primary">R$ {total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Forma de pagamento */}
+            <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-4 space-y-2">
+              <p className="text-sm font-medium mb-2">
+                Forma de pagamento
+              </p>
+              <div className="flex gap-3 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setFormaPagamento("dinheiro")}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                    formaPagamento === "dinheiro"
+                      ? "bg-amber-400 text-slate-950"
+                      : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                  }`}
+                >
+                  Dinheiro
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormaPagamento("cartao")}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                    formaPagamento === "cartao"
+                      ? "bg-amber-400 text-slate-950"
+                      : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                  }`}
+                >
+                  Cartão
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormaPagamento("pix")}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                    formaPagamento === "pix"
+                      ? "bg-amber-400 text-slate-950"
+                      : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                  }`}
+                >
+                  Pix
+                </button>
+              </div>
+            </div>
+
+            {/* Nome */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Nome</label>
+              <input
+                className="w-full rounded-lg bg-slate-950 border border-slate-700 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/70"
+                placeholder="Seu nome completo"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+              />
+            </div>
+
+            {/* Telefone */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Telefone</label>
+              <input
+                className="w-full rounded-lg bg-slate-950 border border-slate-700 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/70"
+                placeholder="(11) 99999-9999"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+              />
+            </div>
+
+            {/* Endereço – só para entrega */}
+            {tipoPedido === "entrega" && (
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Endereço</label>
+                <input
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/70"
+                  placeholder="Rua, número, bairro, cidade"
+                  value={endereco}
+                  onChange={(e) => setEndereco(e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* Horário desejado */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">
+                Horário desejado (opcional)
+              </label>
+              <input
+                className="w-full rounded-lg bg-slate-950 border border-slate-700 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/70"
+                placeholder="Ex: 20h00, assim que possível..."
+                value={horarioDesejado}
+                onChange={(e) => setHorarioDesejado(e.target.value)}
+              />
+            </div>
+
+            {/* Observações */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Observações</label>
+              <textarea
+                className="w-full rounded-lg bg-slate-950 border border-slate-700 px-4 py-2 text-sm h-24 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400/70"
+                placeholder="Ex: Retirar cebola, portão preto..."
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+              />
             </div>
           </div>
-        </div>
-      </main>
 
-      <Footer />
+          {/* COLUNA DIREITA – Resumo */}
+          <div className="bg-slate-900/70 rounded-2xl border border-slate-800 p-6 flex flex-col">
+            <h2 className="text-xl font-bold mb-4">Resumo do pedido</h2>
+
+            <div className="space-y-3 flex-1 overflow-y-auto max-h-[340px] pr-1">
+              {items.length === 0 ? (
+                <p className="text-sm text-slate-400">
+                  Seu carrinho está vazio.
+                </p>
+              ) : (
+                items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-start justify-between gap-4 text-sm"
+                  >
+                    <div>
+                      <p className="font-semibold">{item.nome}</p>
+                      {item.descricao && (
+                        <p className="text-xs text-slate-400">
+                          {item.descricao}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-400 mt-1">
+                        Qtd: {item.quantidade}
+                      </p>
+                    </div>
+                    <p className="font-semibold">
+                      {formatCurrency(item.preco * item.quantidade)}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <hr className="my-4 border-slate-800" />
+
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-slate-300">Subtotal</span>
+                <span className="font-semibold">
+                  {formatCurrency(total)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-300">
+                  Taxa de entrega
+                  {tipoPedido === "retirada" && " (não aplicada)"}
+                </span>
+                <span className="font-semibold">
+                  {formatCurrency(taxaEntrega)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mt-4 text-lg font-bold">
+              <span>Total</span>
+              <span className="text-amber-400">
+                {formatCurrency(totalGeral)}
+              </span>
+            </div>
+
+            <button
+              disabled={loading}
+              onClick={handleFinalizar}
+              className="mt-6 w-full rounded-full bg-gradient-to-r from-amber-400 to-pink-500 py-3 text-sm font-semibold text-slate-950 hover:brightness-105 disabled:opacity-60 disabled:cursor-not-allowed transition"
+            >
+              {loading ? "Enviando pedido..." : "Confirmar pedido"}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

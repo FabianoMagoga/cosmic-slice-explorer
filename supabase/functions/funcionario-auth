@@ -1,0 +1,71 @@
+// @ts-nocheck
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+serve(async (req) => {
+  // Preflight
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { status: 200, headers: corsHeaders });
+  }
+
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Use POST" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
+  const { action, payload } = await req.json();
+
+  if (action === "criar_funcionario") {
+    const { nome, cargo, telefone, usuario, senha } = payload;
+
+    if (!nome || !usuario || !senha) {
+      return new Response(
+        JSON.stringify({ error: "Nome, usuário e senha são obrigatórios." }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const senhaHash = await bcrypt.hash(senha);
+
+    const { error } = await supabase.from("funcionarios").insert({
+      nome,
+      cargo,
+      telefone,
+      usuario,
+      senha_hash: senhaHash,
+    });
+
+    if (error) {
+      console.error(error);
+      return new Response(
+        JSON.stringify({ error: "Erro ao criar funcionário." }),
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
+  return new Response(
+    JSON.stringify({ error: "Ação inválida." }),
+    { status: 400, headers: corsHeaders }
+  );
+});
